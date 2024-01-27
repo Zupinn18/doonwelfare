@@ -55,6 +55,7 @@ app.post("/api/campaigns", async (req, res) => {
       title,
       description,
       imageUrl,
+      amount
     });
 
     // Save the campaign document to the database

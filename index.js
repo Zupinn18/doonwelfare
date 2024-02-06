@@ -122,6 +122,31 @@ app.delete("/api/campaigns/:campaignId", async (req, res) => {
   }
 });
 
+app.put("/api/campaigns/:campaignId", async (req, res) => {
+  try {
+    const { campaignId } = req.params;
+    const { title, description, imageUrl, amount } = req.body;
+
+    // Find the campaign by its ID and update its properties
+    const updatedCampaign = await Campaign.findByIdAndUpdate(
+      campaignId,
+      { title, description, imageUrl, amount },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedCampaign) {
+      // If the campaign is not found, respond with a 404 status code
+      return res.status(404).json({ error: "Campaign not found." });
+    }
+
+    console.log("Campaign updated successfully");
+    res.status(200).json(updatedCampaign); // Respond with the updated campaign data
+  } catch (error) {
+    console.error("Error updating campaign:", error);
+    res.status(500).json({ error: "Failed to update campaign." });
+  }
+});
+
 app.post("/api/items", async (req, res) => {
   try {
     const { name, description, imageUrl, amount, campaignId } = req.body;

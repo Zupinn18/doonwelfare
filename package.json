@@ -16,6 +16,7 @@
     "express": "^4.18.2",
     "mongoose": "^7.5.3",
     "node-fetch": "^3.3.2",
-    "paytmchecksum": "^1.5.1"
+    "paytmchecksum": "^1.5.1",
+    "razorpay": "^2.9.2"
   }
 }

@@ -122,7 +122,7 @@ app.delete("/api/campaigns/:campaignId", async (req, res) => {
   }
 });
 
-app.put("/api/campaigns/update-order", async (req, res) => {
+app.put("/api/campaigns", async (req, res) => {
   try {
     const { campaignIds } = req.body;
 

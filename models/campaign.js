@@ -18,6 +18,10 @@ const campaignSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  requirement: {
+    type: String,
+    required: true,
+  },
   progress: {
     type: Number,
     required: true,

@@ -48,7 +48,7 @@ app.get("/status",async(req,res)=>{
 app.post("/api/campaigns", async (req, res) => {
   try {
     // Get campaign data including progress from the request body
-    const { title, description, imageUrl, amount, progress } = req.body;
+    const { title, description, imageUrl, amount, requirement, progress } = req.body;
 
     // Create a new campaign document with progress
     const newCampaign = new Campaign({
@@ -56,6 +56,7 @@ app.post("/api/campaigns", async (req, res) => {
       description,
       imageUrl,
       amount,
+      requirement,
       progress,
     });
 

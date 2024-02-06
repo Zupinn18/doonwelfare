@@ -18,6 +18,11 @@ const campaignSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  progress: {
+    type: Number,
+    required: true,
+    default: 0, // default progress value is 0
+  },
 });
 
 // Create a Campaign model based on the schema

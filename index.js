@@ -47,15 +47,16 @@ app.get("/status",async(req,res)=>{
 
 app.post("/api/campaigns", async (req, res) => {
   try {
-    // Get campaign data from the request body
-    const { title, description, imageUrl, amount } = req.body;
+    // Get campaign data including progress from the request body
+    const { title, description, imageUrl, amount, progress } = req.body;
 
-    // Create a new campaign document
+    // Create a new campaign document with progress
     const newCampaign = new Campaign({
       title,
       description,
       imageUrl,
       amount,
+      progress,
     });
 
     // Save the campaign document to the database
@@ -68,6 +69,7 @@ app.post("/api/campaigns", async (req, res) => {
     res.status(500).json({ error: "Failed to create campaign." });
   }
 });
+
 
 app.get("/api/campaigns", async (req, res) => {
   try {
@@ -140,6 +142,21 @@ app.put("/api/campaigns", async (req, res) => {
   }
 });
 
+app.put("/api/campaigns/:campaignId/progress", async (req, res) => {
+  try {
+    const { campaignId } = req.params;
+    const { progress } = req.body;
+
+    // Find the campaign by its ID and update the progress
+    await Campaign.findByIdAndUpdate(campaignId, { $set: { progress } });
+
+    console.log("Campaign progress updated successfully");
+    res.status(200).json({ message: "Campaign progress updated successfully" });
+  } catch (error) {
+    console.error("Error updating campaign progress:", error);
+    res.status(500).json({ error: "Failed to update campaign progress." });
+  }
+});
 
 
 app.post("/api/items", async (req, res) => {

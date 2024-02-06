@@ -126,10 +126,10 @@ app.put("/api/campaigns", async (req, res) => {
   try {
     const { campaignIds } = req.body;
 
-    // Iterate through the campaignIds array and update the order based on the index
+    // Iterate through the campaignIds array and update the order based on the order of IDs
     for (let i = 0; i < campaignIds.length; i++) {
       const campaignId = campaignIds[i];
-      await Campaign.findByIdAndUpdate(campaignId, { position: i });
+      await Campaign.findByIdAndUpdate(campaignId, { $set: { order: i } });
     }
 
     console.log("Campaigns order updated successfully");
@@ -139,6 +139,7 @@ app.put("/api/campaigns", async (req, res) => {
     res.status(500).json({ error: "Failed to update campaigns order." });
   }
 });
+
 
 
 app.post("/api/items", async (req, res) => {

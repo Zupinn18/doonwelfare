@@ -10,10 +10,12 @@ import DonationForm from "./models/donationForm.js"; // Import the donation
 import Blogs from './models/blogs.js';
 import CSR from "./models/csr.js"; // Import the
 import PaytmChecksum from 'paytmchecksum';
+import Razorpay from "razorpay";
 import https from 'https';
 
 
 const { PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PORT = 8888 } = process.env;
+
 const base = "https://api.paypal.com";
 const app = express();
 const corsOptions = {
@@ -24,7 +26,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 const MONGO_URI =
-  process.env.MONGO_URI || "mongodb://localhost:27017/your-database-name";
+  process.env.MONGO_URI || "mongodb://localhost:27017/doon_welfare";
 
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
@@ -335,102 +337,51 @@ app.post("/api/orders/:orderID/capture", async (req, res) => {
 });
 
 // serve index.html
-app.get("/", (req, res) => {
-  res.sendFile(path.resolve("./client/checkout.html"));
+// app.get("/", (req, res) => {
+//   res.sendFile(path.resolve("./client/checkout.html"));
+// });
+
+
+
+
+
+app.use(express.urlencoded({extended: false}));
+const razorpayInstance = new Razorpay({
+  key_id: 'rzp_live_4RuB24CIThT3o6',
+  key_secret: 'cYqnCtpbIXcwnE98ZHa1dVI4',
 });
 
-app.post("/api/paytm/initiateTransaction", async (req, res) => {
+// Route for creating a Razorpay order
+app.post('/api/razorpay_order', async (req, res) => {
   try {
-    console.log(req.body); 
+      // Extract required fields from the request body
+      const { amount, currency, receipt, notes } = req.body;
+      const parsedAmount = parseFloat(amount);
 
-    const donationFormData = new DonationForm(req.body);
-    await donationFormData.save();
+      // Create Razorpay order asynchronously
+      const order = await razorpayInstance.orders.create({ amount: parsedAmount, currency, receipt, notes });
 
-    const paytmParams = {
-      body: {
-        requestType: "Payment",
-        mid: "DOONAN17084437757649",
-        websiteName: "DoonAnimalWelfareFoundation",
-        orderId: req.body.orderId,
-        callbackUrl: "http://doonanimalwelfarefoundation.com",
-        txnAmount: {
-          value: req.body.amount,
-          currency: "INR",
-        },
-        userInfo: {
-          custId: "CUST_001",
-        },
-      },
-    };
-
-    // Generate Paytm checksum
-    const checksum = await PaytmChecksum.generateSignature(
-      JSON.stringify(paytmParams.body),
-      "crO0cGe3MTCE11rt"
-    );
-
-    paytmParams.head = {
-      signature: checksum,
-    };
-
-    // Prepare the request data
-    const post_data = JSON.stringify(paytmParams);
-
-    const options = {
-      hostname: 'securegw.paytm.in', // Staging URL
-      port: 443,
-      path: `/theia/api/v1/initiateTransaction?mid=DOONAN17084437757649&orderId=${req.body.orderId}`,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': post_data.length,
-      },
-    };
-
-    // Send the request to Paytm
-    let response = '';
-    const post_req = https.request(options, function (post_res) {
-      post_res.on('data', function (chunk) {
-        response += chunk;
+      // Adjust the response structure to match the frontend expectations
+      res.status(200).json({
+          amount: order.amount,
+          currency: order.currency,
+          id: order.id,
+          prefill: {
+              name: '', // Add the default name if available, or retrieve it from the user session
+              email: '', // Add the default email if available, or retrieve it from the user session
+              contact: '', // Add the default contact if available, or retrieve it from the user session
+          },
       });
-
-      post_res.on('end', function () {
-        console.log('Response: ', response);
-        res.status(200).json({ response }); // Respond with the Paytm response
-      });
-    });
-
-    post_req.write(post_data);
-    post_req.end();
   } catch (error) {
-    console.error('Failed to initiate Paytm transaction:', error);
-    res.status(500).json({ error: 'Failed to initiate Paytm transaction.' });
+      // Handle errors gracefully
+      console.error('Error creating Razorpay order:', error);
+      res.status(500).send('Internal Server Error');
   }
 });
 
-app.post("/api/paytm/success", async (req, res) => {
-  try {
-    const orderId = req.body.orderId;
 
-    // Update the document with the provided orderId
-    const updatedDonationForm = await DonationForm.findOneAndUpdate(
-      { orderId: orderId },
-      { payment: "success" },
-      { new: true } // To return the updated document
-    );
 
-    if (updatedDonationForm) {
-      console.log('DonationForm updated successfully:', updatedDonationForm);
-      res.status(200).json({ success: true });
-    } else {
-      console.error('DonationForm not found for orderId:', orderId);
-      res.status(404).json({ error: 'DonationForm not found' });
-    }
-  } catch (error) {
-    console.error('Error updating DonationForm:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+
 app.post('/api/csr', async (req, res) => {
   try {
     const { amount, email, mobileNumber, message } = req.body;

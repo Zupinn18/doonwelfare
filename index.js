@@ -371,6 +371,7 @@ app.post('/api/razorpay_order', async (req, res) => {
               email: '', // Add the default email if available, or retrieve it from the user session
               contact: '', // Add the default contact if available, or retrieve it from the user session
           },
+          paymentStatus: "pending" // Default payment status
       });
   } catch (error) {
       // Handle errors gracefully
@@ -380,7 +381,7 @@ app.post('/api/razorpay_order', async (req, res) => {
 });
 
 app.post('/api/razorpay-webhook', (req, res) => {
-  const webhookSecret = '4sBGqL_9GLPg8fj';
+  const webhookSecret = '4sBGqL_9GLPg8fj'; // Replace with your webhook secret
   const payload = JSON.stringify(req.body);
   const signature = req.get('X-Razorpay-Signature');
 
@@ -393,21 +394,13 @@ app.post('/api/razorpay-webhook', (req, res) => {
       const event = req.body.event;
       const data = req.body.payload;
 
-      // Handle different types of events (payment.success, payment.failure, etc.)
-      switch (event) {
-        case 'payment.authorized':
-          // Payment is authorized, process successful payment
-          console.log('Successful payment:', data);
-          break;
-        case 'payment.failed':
-          // Payment failed, handle accordingly
-          console.log('Failed payment:', data);
-          break;
-        // Add more cases for other events as needed
-        default:
-          console.log('Unhandled event:', event);
-      }
+      // Update payment status based on the event
+      const paymentStatus = event === 'payment.authorized' ? 'success' : 'failed';
 
+      // Update the donation information with the payment status
+      data.paymentStatus = paymentStatus;
+
+      // Send response indicating successful webhook handling
       res.status(200).send('Webhook received successfully.');
     } else {
       // Invalid signature
@@ -419,6 +412,7 @@ app.post('/api/razorpay-webhook', (req, res) => {
     res.status(500).send('Error processing webhook');
   }
 });
+
 
 
 

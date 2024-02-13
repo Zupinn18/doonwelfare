@@ -21,11 +21,8 @@ const app = express();
 const corsOptions = {
   origin: '*',
 };
-const bodyParser = require('body-parser')
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(cors())
-app.use(bosyParser.json())
 
 
 const MONGO_URI =
@@ -400,8 +397,8 @@ app.post('/api/razorpay-webhook', (req, res) => {
     
   }else{
   }
-res.json({status: 'ok'})
- 
+  res.json({status: 'ok'})
+  
 });
 
 

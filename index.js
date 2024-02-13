@@ -21,9 +21,12 @@ const app = express();
 const corsOptions = {
   origin: '*',
 };
-
+const bodyParser = require('body-parser')
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cors())
+app.use(bosyParser.json())
+
 
 const MONGO_URI =
   process.env.MONGO_URI || "mongodb://localhost:27017/doon_welfare";
@@ -381,45 +384,24 @@ app.post('/api/razorpay_order', async (req, res) => {
 });
 
 app.post('/api/razorpay-webhook', (req, res) => {
-  const webhookSecret = '4sBGqL_9GLPg8fj'; // Replace with your webhook secret
-  const payload = JSON.stringify(req.body);
-  const signature = req.get('X-Razorpay-Signature');
-
-  try {
-    const expectedSignature = crypto.createHmac('sha256', webhookSecret)
-                                   .update(payload)
-                                   .digest('hex');
-    if (signature === expectedSignature) {
-      // Signature is valid, process the webhook event
-      const event = req.body.event;
-      const data = req.body.payload;
-
-      // Update payment status based on the event
-      const paymentStatus = event === 'payment.authorized' ? 'success' : 'failed';
-
-      // Update the donation information with the payment status
-      data.paymentStatus = paymentStatus;
-
-      // Send response indicating successful webhook handling
-      res.status(200).send('Webhook received successfully.');
-    } else {
-      // Invalid signature
-      console.error('Invalid webhook signature');
-      res.status(400).send('Invalid webhook signature');
-    }
-  } catch (error) {
-    console.error('Error processing webhook:', error.message);
-    res.status(500).send('Error processing webhook');
-  }
-});
-
-
-app.post('/api/razorpay-webhook', (req, res) => {
-  const SECRET = '4sBGqL_9GLPg8fj'; // Replace with your webhook secret
+  const secret = '4sBGqL_9GLPg8fj'; // Replace with your webhook secret
 
   console.log(req.body)
 
-  res.json({status: 'ok'})
+  const crypto = require('crypto')
+  const shasum = crypto.createHmac('sha256', secret)
+  shasum.update(JSON.stringify(req.body))
+  const digest = shasum.digest('hex')
+
+  console.log(digest, req.headers['x-razorpay-signature'])
+
+  if(digest === req.header['x-razorpay-signature']){
+    console.log('request is legit') 
+    
+  }else{
+  }
+res.json({status: 'ok'})
+ 
 });
 
 

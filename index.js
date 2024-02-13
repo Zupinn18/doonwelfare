@@ -414,6 +414,13 @@ app.post('/api/razorpay-webhook', (req, res) => {
 });
 
 
+app.post('/api/razorpay-webhook', (req, res) => {
+  const SECRET = '4sBGqL_9GLPg8fj'; // Replace with your webhook secret
+
+  console.log(req.body)
+
+  res.json({status: 'ok'})
+});
 
 
 

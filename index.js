@@ -379,6 +379,47 @@ app.post('/api/razorpay_order', async (req, res) => {
   }
 });
 
+app.post('/api/razorpay-webhook', (req, res) => {
+  const webhookSecret = '4sBGqL_9GLPg8fj';
+  const payload = JSON.stringify(req.body);
+  const signature = req.get('X-Razorpay-Signature');
+
+  try {
+    const expectedSignature = crypto.createHmac('sha256', webhookSecret)
+                                   .update(payload)
+                                   .digest('hex');
+    if (signature === expectedSignature) {
+      // Signature is valid, process the webhook event
+      const event = req.body.event;
+      const data = req.body.payload;
+
+      // Handle different types of events (payment.success, payment.failure, etc.)
+      switch (event) {
+        case 'payment.authorized':
+          // Payment is authorized, process successful payment
+          console.log('Successful payment:', data);
+          break;
+        case 'payment.failed':
+          // Payment failed, handle accordingly
+          console.log('Failed payment:', data);
+          break;
+        // Add more cases for other events as needed
+        default:
+          console.log('Unhandled event:', event);
+      }
+
+      res.status(200).send('Webhook received successfully.');
+    } else {
+      // Invalid signature
+      console.error('Invalid webhook signature');
+      res.status(400).send('Invalid webhook signature');
+    }
+  } catch (error) {
+    console.error('Error processing webhook:', error.message);
+    res.status(500).send('Error processing webhook');
+  }
+});
+
 
 
 

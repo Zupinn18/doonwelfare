@@ -385,18 +385,18 @@ app.post('/api/razorpay-webhook', (req, res) => {
 
   console.log(req.body)
 
-  const crypto = require('crypto')
-  const shasum = crypto.createHmac('sha256', secret)
-  shasum.update(JSON.stringify(req.body))
-  const digest = shasum.digest('hex')
+  // const crypto = require('crypto')
+  // const shasum = crypto.createHmac('sha256', secret)
+  // shasum.update(JSON.stringify(req.body))
+  // const digest = shasum.digest('hex')
 
-  console.log(digest, req.headers['x-razorpay-signature'])
+  // console.log(digest, req.headers['x-razorpay-signature'])
 
-  if(digest === req.header['x-razorpay-signature']){
-    console.log('request is legit') 
+  // if(digest === req.header['x-razorpay-signature']){
+  //   console.log('request is legit') 
     
-  }else{
-  }
+  // }else{
+  // }
   res.json({status: 'ok'})
   
 });

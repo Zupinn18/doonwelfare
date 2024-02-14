@@ -380,43 +380,18 @@ app.post('/api/razorpay_order', async (req, res) => {
   }
 });
 
-app.post('/api/razorpay-webhook', (req, res) => {
-  const secret = '4sBGqL_9GLPg8fj'; // Replace with your webhook secret
+// Route for fetching all payments
+app.get('/api/razorpay_payments', async (req, res) => {
+  try {
+    // Fetch all payments from Razorpay API
+    const payments = await razorpayInstance.payments.all();
 
-  // Verify webhook signature
-  const crypto = require('crypto');
-  const shasum = crypto.createHmac('sha256', secret);
-  const webhookSignature = req.headers['x-razorpay-signature'];
-  const generatedSignature = shasum.update(JSON.stringify(req.body)).digest('hex');
-
-  if (webhookSignature === generatedSignature) {
-    // Signature is valid, handle payment event
-    const event = req.body.event;
-
-    // Handle payment success event
-    if (event === 'payment.captured') {
-      const paymentId = req.body.payload.payment.entity.id;
-      const amount = req.body.payload.payment.entity.amount;
-      const currency = req.body.payload.payment.entity.currency;
-      const name = req.body.payload.payment.entity.notes.name;
-      const phoneNumber = req.body.payload.payment.entity.notes.contact;
-      const orderId = req.body.payload.payment.entity.notes.order_id;
-
-      // Process payment success event
-      console.log(`Payment captured - ID: ${paymentId}, Amount: ${amount}, Currency: ${currency}`);
-      console.log(`Name: ${name}, Phone Number: ${phoneNumber}, Order ID: ${orderId}`);
-      // You can update your database, send confirmation emails, etc. here
-
-      res.status(200).json({ status: 'ok' });
-    } else {
-      // Handle other events if needed
-      console.log(`Unhandled event: ${event}`);
-      res.status(200).json({ status: 'ok' });
-    }
-  } else {
-    // Signature is invalid
-    console.error('Invalid webhook signature');
-    res.status(400).send('Invalid signature');
+    // Send the payments data as the response
+    res.status(200).json(payments);
+  } catch (error) {
+    // Handle errors gracefully
+    console.error('Error fetching payments:', error);
+    res.status(500).send('Internal Server Error');
   }
 });
 

@@ -51,7 +51,7 @@ const username = 'admin';
 const password = 'admin';
 
 // Login endpoint
-app.post('/api/admin', (req, res) => {
+app.post('/admin', (req, res) => {
   const { email, password: userPassword } = req.body;
 
   // Check if email and password match the hardcoded credentials

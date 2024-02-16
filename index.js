@@ -47,6 +47,21 @@ app.get("/status",async(req,res)=>{
   res.send("works");
 });
 
+const username = 'admin';
+const password = 'admin';
+
+// Login endpoint
+app.post('/api/admin', (req, res) => {
+  const { email, password: userPassword } = req.body;
+
+  // Check if email and password match the hardcoded credentials
+  if (email === username && userPassword === password) {
+    res.status(200).json({ message: 'Login successful' });
+  } else {
+    res.status(401).json({ message: 'Incorrect email or password' });
+  }
+});
+
 app.post("/api/campaigns", async (req, res) => {
   try {
     // Get campaign data including progress from the request body

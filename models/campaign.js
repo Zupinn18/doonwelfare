@@ -27,6 +27,7 @@ const campaignSchema = new mongoose.Schema({
     required: true,
     default: 0, // default progress value is 0
   },
+  order: { type: Number, default: 0 }, // New field to store the order
 });
 
 // Create a Campaign model based on the schema

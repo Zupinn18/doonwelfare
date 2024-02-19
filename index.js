@@ -62,6 +62,7 @@ app.post("/api/campaigns", async (req, res) => {
       amount,
       requirement,
       progress,
+      
     });
 
     // Save the campaign document to the database
@@ -78,8 +79,8 @@ app.post("/api/campaigns", async (req, res) => {
 
 app.get("/api/campaigns", async (req, res) => {
   try {
-    // Fetch all campaigns from the database
-    const campaigns = await Campaign.find();
+    // Fetch all campaigns from the database and sort them by the 'order' field
+    const campaigns = await Campaign.find().sort({ order: 1 });
 
     // Respond with the list of campaigns
     res.status(200).json(campaigns);
@@ -88,6 +89,7 @@ app.get("/api/campaigns", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch campaigns." });
   }
 });
+
 app.get("/api/campaigns/:campaignId", async (req, res) => {
   try {
     const { campaignId } = req.params;

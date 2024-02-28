@@ -294,23 +294,44 @@ app.get("/api/get-data/:id", async (req, res) => {
   }
 });
 
-app.put("/api/update-data", async(req,res)=>{
-  try{
-    const { imageUrl1,imageUrl2,imageUrl3, description1, description2, description3, campaignId } = req.body;
+app.get("/api/get-all-data", async (req, res) => {
+  try {
+    const {id} = req.params;
+   // Fetch all items from the database
+    const datas = await Data.find({}).populate({
+      path: "campaignId",
+    });
 
-    const updateData = await Data.findOneAndUpdate(
-        {campaignId:campaignId}, 
-        { $set: 
-          { imageUrl1: imageUrl1,
-          imageUrl2:imageUrl2,
-          imageUrl3:imageUrl3,
-          description1:description1,
-          description2:description2,
-          description3:description3,
-          campaignId:campaignId 
-        } },
-      {new: true},
-    );
+    // Respond with the list of items
+    console.log("All Data fetched successfully");
+    res.status(200).json({
+      success:true,
+      message:"All Data fetched successfully",
+      data:datas
+    }); // Respond with the saved item data
+  } catch (error) {
+    console.error("Failed to fetch all datas:", error);
+    res.status(500).json({ error: "Failed to fetch all datas." });
+  }
+});
+
+app.put("/api/update-data/:id", async(req,res)=>{
+  try{
+    const {id} = req.params;
+    const { imageUrl1,imageUrl2,imageUrl3, description1, description2, description3, campaignId } = req.body;
+    const updateData = await Data.findByIdAndUpdate(
+      {_id:id}, 
+      { $set: 
+        { imageUrl1: imageUrl1,
+        imageUrl2:imageUrl2,
+        imageUrl3:imageUrl3,
+        description1:description1,
+        description2:description2,
+        description3:description3,
+        campaignId:campaignId 
+      } },
+    {new: true},
+  );
 
     return res.status(200).json({
       success:true,

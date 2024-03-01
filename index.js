@@ -12,7 +12,9 @@ import CSR from "./models/csr.js"; // Import the
 import PaytmChecksum from 'paytmchecksum';
 import Razorpay from "razorpay";
 import https from 'https';
-
+import axios from 'axios';
+import crypto from 'crypto';
+import Data from "./models/campaginData.js";
 
 const { PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PORT = 8888 } = process.env;
 
@@ -168,7 +170,7 @@ app.put("/api/campaigns/:campaignId/progress", async (req, res) => {
 
 app.post("/api/items", async (req, res) => {
   try {
-    const { name, description, imageUrl, amount, campaignId } = req.body;
+   const { name, description, imageUrl, amount, campaignId } = req.body;
 
     // Create a new Item document
     const newItem = new Item({
@@ -176,14 +178,26 @@ app.post("/api/items", async (req, res) => {
       description,
       imageUrl,
       amount,
-      campaignId,
+      campaignId
     });
 
     // Save the item to the database
-    await newItem.save();
+    const itemName = await newItem.save();
+
+    // const item = await Item.create({
+    //   name,
+    //   description,
+    //   imageUrl,
+    //   amount,
+    //   campaignId
+    // });
 
     console.log("Item saved successfully");
-    res.status(201).json(newItem); // Respond with the saved item data
+    res.status(201).json({
+      success:true,
+      message:"Item created successfully",
+      data:itemName
+    }); // Respond with the saved item data
   } catch (error) {
     console.error("Error saving item:", error);
     res.status(500).json({ error: "Failed to create item." });
@@ -193,7 +207,9 @@ app.post("/api/items", async (req, res) => {
 app.get("/api/items", async (req, res) => {
   try {
     // Fetch all items from the database
-    const items = await Item.find();
+    const items = await Item.find().populate({
+      path: "campaignId",
+    });
 
     // Respond with the list of items
     res.status(200).json(items);
@@ -210,7 +226,7 @@ app.delete("/api/items/:itemsId", async (req, res) => {
     const deletedItem = await Item.deleteOne({ _id: itemsId });
 
     if (deletedItem.deletedCount === 1) {
-      console.log("ItedeletedItem deleted successfully");
+      console.log("Item deletedItem deleted successfully");
       res.status(204).send();
     } else {
       console.error("dItem not found");
@@ -221,6 +237,118 @@ app.delete("/api/items/:itemsId", async (req, res) => {
     res.status(500).json({ error: "Failed to delete Item." });
   }
 });
+
+
+// Campagin Images and Description Text
+app.post("/api/create-data", async (req, res) => {
+  try {
+   const { imageUrl1,imageUrl2,imageUrl3, description1, description2, description3, campaignId } = req.body;
+
+   if(!imageUrl1 || !campaignId){
+    return res.status(400).json({
+      success:false,
+      message:"ImageUrl1 and Campign Id are mandatory"
+    });
+   }
+
+    const item = await Data.create({
+      imageUrl1, 
+      imageUrl2,
+      imageUrl3, 
+      description1, 
+      description2, 
+      description3, 
+      campaignId
+    });
+
+    console.log("Data saved successfully");
+    res.status(201).json({
+      success:true,
+      message:"Data created successfully",
+      data:item
+    }); // Respond with the saved item data
+  } catch (error) {
+    console.error("Error saving Data:", error);
+    res.status(500).json({ error: "Failed to create Data." });
+  }
+});
+
+app.get("/api/get-data/:id", async (req, res) => {
+  try {
+    const {id} = req.params;
+   // Fetch all items from the database
+    const datas = await Data.findOne({
+      campaignId:id
+    }).populate({
+      path: "campaignId",
+    });
+
+    // Respond with the list of items
+    console.log("Data fetched successfully");
+    res.status(200).json({
+      success:true,
+      message:"Data fetched successfully",
+      data:datas
+    }); // Respond with the saved item data
+  } catch (error) {
+    console.error("Failed to fetch datas:", error);
+    res.status(500).json({ error: "Failed to fetch datas." });
+  }
+});
+
+app.get("/api/get-all-data", async (req, res) => {
+  try {
+    const {id} = req.params;
+   // Fetch all items from the database
+    const datas = await Data.find({}).populate({
+      path: "campaignId",
+    });
+
+    // Respond with the list of items
+    console.log("All Data fetched successfully");
+    res.status(200).json({
+      success:true,
+      message:"All Data fetched successfully",
+      data:datas
+    }); // Respond with the saved item data
+  } catch (error) {
+    console.error("Failed to fetch all datas:", error);
+    res.status(500).json({ error: "Failed to fetch all datas." });
+  }
+});
+
+app.put("/api/update-data/:id", async(req,res)=>{
+  try{
+    const {id} = req.params;
+    const { imageUrl1,imageUrl2,imageUrl3, description1, description2, description3, campaignId } = req.body;
+    const updateData = await Data.findByIdAndUpdate(
+      {_id:id}, 
+      { $set: 
+        { imageUrl1: imageUrl1,
+        imageUrl2:imageUrl2,
+        imageUrl3:imageUrl3,
+        description1:description1,
+        description2:description2,
+        description3:description3,
+        campaignId:campaignId 
+      } },
+    {new: true},
+  );
+
+    return res.status(200).json({
+      success:true,
+      message:'Campagin Data updated Successfully',
+      data:updateData
+    });
+
+  }catch(error){
+    console.error("Error saving Data:", error);
+    res.status(500).json({
+      success:false,
+      message:`Can't Update campaign Data due to ${error.message}`
+    });
+  }
+})
 
 const generateAccessToken = async () => {
   try {
@@ -399,6 +527,38 @@ app.get('/api/razorpay_payments', async (req, res) => {
   }
 });
 
+// verify
+app.post('/api/verify', async(req,res)=>{
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature
+    } = req.body;
+    const sign = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSign = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET).update(sign.toString()).digest("hex");
+
+    if(razorpay_signature === expectedSign ){
+      return res.status(200).json({
+        success:"true",
+        message:"Payment verified Successfully",
+      });
+    }else{
+      return res.status(400).json({
+        success:"false",
+        message:"Invalid signature sent !",
+      });
+    }
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success:"false",
+      message:`Can't verify payment due to ${error.message}`
+    });
+  }
+})
+
 
 
 
@@ -522,6 +682,64 @@ app.delete('/api/blogs/:blogId', async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+// // whatsapp api => code at frontend
+// app.post('/api/place-order', async (req, res) => {
+//   try {
+//     // Assuming order details are sent in the request body
+//     const { phoneNumber } = req.body;
+    
+//     // Send WhatsApp notification
+//     await sendWhatsAppNotification(phoneNumber, 'Your order has been placed successfully!');
+
+//     res.status(200).json({
+//       success:true,
+//       message:'Order placed successfully',
+//     });
+//   } catch (error) {
+//     console.error('Error placing order:', error);
+//     res.status(500).json({
+//       success:false,
+//       message:error.message
+//     });
+//   }
+// });
+
+// // Function to send WhatsApp notification using Interkart API
+// async function sendWhatsAppNotification(phoneNumber, message) {
+//   try {
+
+//     // Make a POST request to Interkart API to send WhatsApp message
+//     const response = await axios.post('https://api.interakt.ai/v1/public/message/', {
+//       "countryCode": "+91",
+//       "phoneNumber": phoneNumber,
+//       "fullPhoneNumber": "", // Optional, Either fullPhoneNumber or phoneNumber + CountryCode is required
+//       "callbackData": "Congratulations for placing your order",
+//       "type": "Template",
+//       "template": {
+//           "name": "orderplaced",
+//           "languageCode": "en",
+//           "bodyValues": [
+//               "hello",
+//               "21"
+//           ]
+//       }
+//   }, {
+//       headers: {
+//         'Authorization': 'Basic Mzc5YnZSc2M2VHVNSzBLbHRnclZjNTZCSXlhejdQdGwyeFNJM1dUUnZCNDo=',
+//         'Content-Type': 'application/json'
+//       }
+//     });
+
+//     console.log('WhatsApp notification sent successfully:', response);
+//   } catch (error) {
+//     console.error('Error sending WhatsApp notification:', error.message);
+//   }
+// }
+
+
+
+
 app.listen(PORT, () => {
   console.log(`Node server listening at http://localhost:${PORT}/`);
 });

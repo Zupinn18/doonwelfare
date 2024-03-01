@@ -238,7 +238,7 @@ app.delete("/api/items/:itemsId", async (req, res) => {
 
 
 // Campagin Images and Description Text
-app.post("/api/create-data", async (req, res) => {
+app.post("/api/campaign_data", async (req, res) => {
   try {
    const { imageUrl1,imageUrl2,imageUrl3, description1, description2, description3, campaignId } = req.body;
 
@@ -271,7 +271,7 @@ app.post("/api/create-data", async (req, res) => {
   }
 });
 
-app.get("/api/get-data/:id", async (req, res) => {
+app.get("/api/campaign_data/:id", async (req, res) => {
   try {
     const {id} = req.params;
    // Fetch all items from the database
@@ -294,7 +294,7 @@ app.get("/api/get-data/:id", async (req, res) => {
   }
 });
 
-app.get("/api/get-all-data", async (req, res) => {
+app.get("/api/campaign_data", async (req, res) => {
   try {
     const {id} = req.params;
    // Fetch all items from the database
@@ -315,7 +315,7 @@ app.get("/api/get-all-data", async (req, res) => {
   }
 });
 
-app.put("/api/update-data/:id", async(req,res)=>{
+app.put("/api/campaign_data/:id", async(req,res)=>{
   try{
     const {id} = req.params;
     const { imageUrl1,imageUrl2,imageUrl3, description1, description2, description3, campaignId } = req.body;

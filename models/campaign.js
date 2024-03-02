@@ -16,15 +16,15 @@ const campaignSchema = new mongoose.Schema({
   },
   amount: {
     type: Number,
-    required: true,
+    required: false,
   },
   requirement: {
     type: String,
-    required: true,
+    required: false,
   },
   progress: {
     type: Number,
-    required: true,
+    required: false,
     default: 0, // default progress value is 0
   },
   order: { type: Number, default: 0 }, // New field to store the order

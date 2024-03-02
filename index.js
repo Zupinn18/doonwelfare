@@ -348,6 +348,28 @@ app.put("/api/campaign_data/:id", async(req,res)=>{
   }
 })
 
+app.delete("/api/campaign_data/:id", async (req, res) => {
+  try {
+    const {id} = req.params;
+   // Fetch all items from the database
+    const datas = await Data.deleteOne({
+      campaignId:id
+    });
+
+    // Respond with the list of items
+    console.log("Campaign Data Deleted successfully");
+    res.status(200).json({
+      success:true,
+      message:" Campaign Data deleted successfully",
+      data:datas
+    }); // Respond with the saved item data
+  } catch (error) {
+    console.error("Failed to delete datas:", error);
+    res.status(500).json({ error: "Failed to delete datas." });
+  }
+});
+
+
 const generateAccessToken = async () => {
   try {
     if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {

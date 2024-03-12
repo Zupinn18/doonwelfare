@@ -296,6 +296,24 @@ app.get("/api/campaign_data/:id", async (req, res) => {
   }
 });
 
+
+app.delete("/api/campaign_data/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Delete the data from the database
+    await Data.deleteOne({ _id: id });
+    // Respond with success message
+    console.log("Data deleted successfully");
+    res.status(200).json({
+      success: true,
+      message: "Data deleted successfully",
+    });
+  } catch (error) {
+    console.error("Failed to delete data:", error);
+    res.status(500).json({ error: "Failed to delete data." });
+  }
+});
+
 // app.get("/api/campaign_data", async (req, res) => {
 //   try {
 //     const {id} = req.params;

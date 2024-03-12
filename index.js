@@ -296,26 +296,26 @@ app.get("/api/campaign_data/:id", async (req, res) => {
   }
 });
 
-app.get("/api/campaign_data", async (req, res) => {
-  try {
-    const {id} = req.params;
-   // Fetch all items from the database
-    const datas = await Data.find({}).populate({
-      path: "campaignId",
-    });
+// app.get("/api/campaign_data", async (req, res) => {
+//   try {
+//     const {id} = req.params;
+//    // Fetch all items from the database
+//     const datas = await Data.find({}).populate({
+//       path: "campaignId",
+//     });
 
-    // Respond with the list of items
-    console.log("All Data fetched successfully");
-    res.status(200).json({
-      success:true,
-      message:"All Data fetched successfully",
-      data:datas
-    }); // Respond with the saved item data
-  } catch (error) {
-    console.error("Failed to fetch all datas:", error);
-    res.status(500).json({ error: "Failed to fetch all datas." });
-  }
-});
+//     // Respond with the list of items
+//     console.log("All Data fetched successfully");
+//     res.status(200).json({
+//       success:true,
+//       message:"All Data fetched successfully",
+//       data:datas
+//     }); // Respond with the saved item data
+//   } catch (error) {
+//     console.error("Failed to fetch all datas:", error);
+//     res.status(500).json({ error: "Failed to fetch all datas." });
+//   }
+// });
 
 app.put("/api/campaign_data/:id", async(req,res)=>{
   try{

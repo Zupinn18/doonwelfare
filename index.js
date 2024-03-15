@@ -242,7 +242,7 @@ app.delete("/api/items/:itemsId", async (req, res) => {
 // Campagin Images and Description Text
 app.post("/api/campaign_data", async (req, res) => {
   try {
-   const { imageUrl1,imageUrl2,imageUrl3, description1, description2, description3, campaignId } = req.body;
+   const { imageUrl1,imageUrl2,imageUrl3,youtubeLink, description1, description2, description3, campaignId } = req.body;
 
    if(!imageUrl1 || !campaignId){
     return res.status(400).json({
@@ -255,6 +255,7 @@ app.post("/api/campaign_data", async (req, res) => {
       imageUrl1, 
       imageUrl2,
       imageUrl3, 
+      youtubeLink,
       description1, 
       description2, 
       description3, 
@@ -296,37 +297,56 @@ app.get("/api/campaign_data/:id", async (req, res) => {
   }
 });
 
-app.get("/api/campaign_data", async (req, res) => {
-  try {
-    const {id} = req.params;
-   // Fetch all items from the database
-    const datas = await Data.find({}).populate({
-      path: "campaignId",
-    });
 
-    // Respond with the list of items
-    console.log("All Data fetched successfully");
+app.delete("/api/campaign_data/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Delete the data from the database
+    await Data.deleteOne({ _id: id });
+    // Respond with success message
+    console.log("Data deleted successfully");
     res.status(200).json({
-      success:true,
-      message:"All Data fetched successfully",
-      data:datas
-    }); // Respond with the saved item data
+      success: true,
+      message: "Data deleted successfully",
+    });
   } catch (error) {
-    console.error("Failed to fetch all datas:", error);
-    res.status(500).json({ error: "Failed to fetch all datas." });
+    console.error("Failed to delete data:", error);
+    res.status(500).json({ error: "Failed to delete data." });
   }
 });
+
+// app.get("/api/campaign_data", async (req, res) => {
+//   try {
+//     const {id} = req.params;
+//    // Fetch all items from the database
+//     const datas = await Data.find({}).populate({
+//       path: "campaignId",
+//     });
+
+//     // Respond with the list of items
+//     console.log("All Data fetched successfully");
+//     res.status(200).json({
+//       success:true,
+//       message:"All Data fetched successfully",
+//       data:datas
+//     }); // Respond with the saved item data
+//   } catch (error) {
+//     console.error("Failed to fetch all datas:", error);
+//     res.status(500).json({ error: "Failed to fetch all datas." });
+//   }
+// });
 
 app.put("/api/campaign_data/:id", async(req,res)=>{
   try{
     const {id} = req.params;
-    const { imageUrl1,imageUrl2,imageUrl3, description1, description2, description3, campaignId } = req.body;
+    const { imageUrl1,imageUrl2,imageUrl3,youtubeLink, description1, description2, description3, campaignId } = req.body;
     const updateData = await Data.findByIdAndUpdate(
       {_id:id}, 
       { $set: 
         { imageUrl1: imageUrl1,
         imageUrl2:imageUrl2,
         imageUrl3:imageUrl3,
+        youtubeLink:youtubeLink,
         description1:description1,
         description2:description2,
         description3:description3,
@@ -349,6 +369,28 @@ app.put("/api/campaign_data/:id", async(req,res)=>{
     });
   }
 })
+
+app.delete("/api/campaign_data/:id", async (req, res) => {
+  try {
+    const {id} = req.params;
+   // Fetch all items from the database
+    const datas = await Data.deleteOne({
+      campaignId:id
+    });
+
+    // Respond with the list of items
+    console.log("Campaign Data Deleted successfully");
+    res.status(200).json({
+      success:true,
+      message:" Campaign Data deleted successfully",
+      data:datas
+    }); // Respond with the saved item data
+  } catch (error) {
+    console.error("Failed to delete datas:", error);
+    res.status(500).json({ error: "Failed to delete datas." });
+  }
+});
+
 
 const generateAccessToken = async () => {
   try {

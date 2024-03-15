@@ -13,6 +13,10 @@ const campaignData = new mongoose.Schema({
     type:String,
     required:true,
   },
+  youtubeLink:  {
+    type:String,
+    required:true,
+  },
   description1: {
     type: String,
     required: true,

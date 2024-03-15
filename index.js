@@ -242,7 +242,7 @@ app.delete("/api/items/:itemsId", async (req, res) => {
 // Campagin Images and Description Text
 app.post("/api/campaign_data", async (req, res) => {
   try {
-   const { imageUrl1,imageUrl2,imageUrl3, description1, description2, description3, campaignId } = req.body;
+   const { imageUrl1,imageUrl2,imageUrl3,youtubeLink, description1, description2, description3, campaignId } = req.body;
 
    if(!imageUrl1 || !campaignId){
     return res.status(400).json({
@@ -255,6 +255,7 @@ app.post("/api/campaign_data", async (req, res) => {
       imageUrl1, 
       imageUrl2,
       imageUrl3, 
+      youtubeLink,
       description1, 
       description2, 
       description3, 
@@ -338,13 +339,14 @@ app.delete("/api/campaign_data/:id", async (req, res) => {
 app.put("/api/campaign_data/:id", async(req,res)=>{
   try{
     const {id} = req.params;
-    const { imageUrl1,imageUrl2,imageUrl3, description1, description2, description3, campaignId } = req.body;
+    const { imageUrl1,imageUrl2,imageUrl3,youtubeLink, description1, description2, description3, campaignId } = req.body;
     const updateData = await Data.findByIdAndUpdate(
       {_id:id}, 
       { $set: 
         { imageUrl1: imageUrl1,
         imageUrl2:imageUrl2,
         imageUrl3:imageUrl3,
+        youtubeLink:youtubeLink,
         description1:description1,
         description2:description2,
         description3:description3,
